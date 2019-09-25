@@ -1,15 +1,43 @@
-churn_list<-read.csv("data/churn_train.csv")
-attach(churn_list)
+
 library(dplyr)
 library(ggplot2)
+library(caret)
+library(corrplot)
 
-churn_list %>% ggplot() + 
-  geom_histogram(aes(total_day_minutes))
 
-churn_list %>% ggplot() + 
+
+churn_train<-read.csv("data/churn_train.csv")
+
+
+
+#check for missing target
+which(is.na(churn_train$churn))
+
+
+#collinearity analysis
+
+num<-unlist(lapply(churn_train, is.numeric))
+ch.train.cor<-churn_train[,num]
+cor.matrix<-cor(ch.train.cor)
+corrplot(cor.matrix, order="hclust", tl.pos='n')
+highcor<-findCorrelation(cor.matrix, cutoff=0.9, exact=TRUE, name=TRUE)
+#corrplot(cor(ch.train.cor[,-highcor]), order="hclust", tl.pos='n')
+highcor
+
+#remove correlated vars
+train.cor<-churn_train[,!names(churn_train) %in% highcor)]
+
+
+
+
+
+attach(train.cor)
+
+
+train.cor %>% ggplot() + 
   geom_histogram(aes(total_day_calls))
 
-churn_list %>% ggplot() + 
+train.cor %>% ggplot() + 
   geom_histogram(aes(total_day_charge))
 
 #continue with other variables
@@ -17,16 +45,16 @@ churn_list %>% ggplot() +
 
 
 #bar plots - churn based on class
-ggplot(data=churn_list, aes(international_plan)) +
+ggplot(data=train.cor, aes(international_plan)) +
   geom_bar(aes(fill = churn))
 
-ggplot(data=churn_list, aes(voice_mail_plan)) +
+ggplot(data=train.cor, aes(voice_mail_plan)) +
   geom_bar(aes(fill = churn))
 
-ggplot(data=churn_list, aes(state)) +
+ggplot(data=train.cor, aes(state)) +
   geom_bar(aes(fill = churn))
 
 #
-churn_list %>% filter(churn=='')%>%
+train.cor %>% filter(churn=='')%>%
   ggplot( aes(voice_mail_plan)) +
   geom_bar(aes(fill = churn))
