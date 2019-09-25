@@ -25,14 +25,27 @@ highcor<-findCorrelation(cor.matrix, cutoff=0.9, exact=TRUE, name=TRUE)
 highcor
 
 #remove correlated vars
-train.cor<-churn_train[,!names(churn_train) %in% highcor)]
+train.cor<-churn_train[,!names(churn_train) %in% highcor]
 
 
+#histograms
 
+library(reshape2)
 
+ggplot(data = melt(train.cor), aes(x = value)) + 
+  stat_density() + 
+  facet_wrap(~variable, scales = "free")
 
-attach(train.cor)
+train.cor<-train.cor %>% mutate(vmail_flag=ifelse(number_vmail_messages==0,"no","yes"))
 
+str(train.cor)
+
+summary(train.cor$number_vmail_messages)
+
+train.log<-train.cor %>% mutate(number=log(total_intl_calls))
+
+train.cor %>% ggplot() + 
+  geom_histogram(aes(number_vmail_messages))
 
 train.cor %>% ggplot() + 
   geom_histogram(aes(total_day_calls))
@@ -58,3 +71,5 @@ ggplot(data=train.cor, aes(state)) +
 train.cor %>% filter(churn=='')%>%
   ggplot( aes(voice_mail_plan)) +
   geom_bar(aes(fill = churn))
+
+
