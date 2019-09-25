@@ -1,13 +1,14 @@
-
+library(randomForest)
 library(dplyr)
 library(ggplot2)
 library(caret)
 library(corrplot)
+library(party)
 
 
 
 churn_train<-read.csv("data/churn_train.csv")
-
+churn_list<-read.csv("data/churn_list.csv")
 
 
 #check for missing target
@@ -43,6 +44,10 @@ str(train.cor)
 summary(train.cor$number_vmail_messages)
 
 train.log<-train.cor %>% mutate(number=log(total_intl_calls))
+
+ggplot(data = melt(train.log), aes(x = value)) + 
+  stat_density() + 
+  facet_wrap(~variable, scales = "free")
 
 train.cor %>% ggplot() + 
   geom_histogram(aes(number_vmail_messages))
