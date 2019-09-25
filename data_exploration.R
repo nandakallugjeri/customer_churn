@@ -1,5 +1,7 @@
 churn_list<-read.csv("data/churn_train.csv")
 attach(churn_list)
+library(dplyr)
+library(ggplot2)
 
 churn_list %>% ggplot() + 
   geom_histogram(aes(total_day_minutes))
