@@ -1,0 +1,73 @@
+---
+title: "Customer churn Use Case"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(caret)
+library(dplyr)
+library(ggplot2)
+library(gbm)
+library(reshape2)
+library(caTools)
+```
+
+# 0. Read datasets
+
+```{r}
+churn_train <- read.csv("~/data/churn_train.csv")
+train.log <-read.csv("~/customer_churn/train.log.csv")
+#splitting
+smp_size <- floor(0.80 * nrow(train.log))
+
+train_ind <- sample(seq_len(nrow(train.log)), size = smp_size)
+
+train <- train.log[train_ind, ]
+test <- train.log[-train_ind, ]
+
+
+model_gbm<-readRDS("~/customer_churn/Group2_model.rds")
+
+
+
+
+```
+
+# 1. Pre-processing inputs
+
+
+
+
+```{r}
+ggplot(data = melt(train.log[,-c(1,ncol(train.log))]), aes(x = value)) + 
+  stat_density() + 
+  facet_wrap(~variable, scales = "free")
+
+```
+
+
+
+# 2. Final Model
+
+Choose an appropriate model
+
+```{r}
+plot(varImp(model_gbm))
+
+
+```
+
+# 3. Model Accuracy
+
+```{r}
+gbm.pred1<-predict(model_gbm,newdata=test)
+ctable <- as.table(confusionMatrix(gbm.pred1,test$churn), nrow = 2, byrow = TRUE)
+fourfoldplot(ctable, color = c("#CC6666", "#99CC99"),
+             conf.level = 0, margin = 1, main = "Confusion Matrix")
+
+gbm.pred<-predict(model_gbm,newdata=test,type="prob")
+out <- colAUC(gbm.pred, test$churn, plotROC = TRUE)
+```
+
+
