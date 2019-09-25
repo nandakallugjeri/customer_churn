@@ -55,7 +55,7 @@ Choose an appropriate model
 ```{r}
 plot(varImp(model_gbm))
 
-
+model_gbm
 ```
 
 # 3. Model Accuracy
